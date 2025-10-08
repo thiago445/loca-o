@@ -39,7 +39,7 @@ jobs:
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
-  
+    
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
@@ -60,4 +60,6 @@ jobs:
           app-name: 'locacao'
           slot-name: 'Production'
           package: '*.jar'
-          
+          # --- CORREÇÃO ADICIONADA AQUI ---
+          # Esta linha instrui o App Service a executar o .jar após o deploy.
+          startup-command: 'java -jar *.jar'
