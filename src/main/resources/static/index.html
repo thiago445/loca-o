@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel da Locadora</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        .modal-content {
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+        }
+        .modal-backdrop.flex {
+            display: flex;
+        }
+        .modal-backdrop.flex .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .toast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: white;
+            transition: bottom 0.5s ease-in-out;
+            z-index: 100;
+        }
+        .toast.show {
+            bottom: 30px;
+        }
+        .toast.success { background-color: #28a745; }
+        .toast.error { background-color: #dc3545; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 antialiased">
+
+<!-- Container Principal -->
+<div class="container mx-auto p-4 md:p-8">
+    <header class="text-center mb-10">
+        <h1 class="text-4xl font-bold text-white tracking-tight">Painel da Locadora</h1>
+        <p class="text-lg text-gray-400 mt-2">Gerencie seus clientes, veículos e locações com facilidade.</p>
+    </header>
+
+    <!-- Ações Principais -->
+    <div class="flex flex-wrap justify-center gap-4 mb-10">
+        <button onclick="openModal('clienteModal')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
+            <i class="fas fa-user-plus mr-2"></i> Adicionar Cliente
+        </button>
+        <button onclick="openModal('veiculoModal')" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
+            <i class="fas fa-car-side mr-2"></i> Adicionar Veículo
+        </button>
+    </div>
+
+    <!-- Layout Principal (Grid) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- Coluna de Clientes -->
+        <div>
+            <h2 class="text-2xl font-semibold mb-4 border-b-2 border-indigo-500 pb-2">Clientes e Suas Locações</h2>
+            <div id="clientes-list" class="space-y-4">
+                <!-- Clientes serão inseridos aqui -->
+                <p class="text-gray-500">Nenhum cliente encontrado. Adicione um novo cliente para começar.</p>
+            </div>
+        </div>
+
+        <!-- Coluna de Veículos Disponíveis -->
+        <div>
+            <h2 class="text-2xl font-semibold mb-4 border-b-2 border-teal-500 pb-2">Veículos Disponíveis</h2>
+            <div id="veiculos-list" class="space-y-4">
+                <!-- Veículos serão inseridos aqui -->
+                <p class="text-gray-500">Nenhum veículo disponível no momento.</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Adicionar Cliente -->
+<div id="clienteModal" class="modal-backdrop">
+    <div class="modal-content bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-6">
+        <h3 class="text-xl font-semibold mb-4">Adicionar Novo Cliente</h3>
+        <form id="addClienteForm">
+            <div class="space-y-4">
+                <input type="text" id="clienteName" placeholder="Nome completo" class="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                <input type="text" id="clienteTelefone" placeholder="Telefone (ex: 11987654321)" class="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                <input type="text" id="clienteCpf" placeholder="CPF (ex: 123.456.789-00)" class="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            </div>
+            <div class="flex justify-end mt-6 gap-3">
+                <button type="button" onclick="closeModal('clienteModal')" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancelar</button>
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Adicionar Veículo -->
+<div id="veiculoModal" class="modal-backdrop">
+    <div class="modal-content bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-6">
+        <h3 class="text-xl font-semibold mb-4">Adicionar Novo Veículo</h3>
+        <form id="addVeiculoForm">
+            <div class="space-y-4">
+                <input type="text" id="veiculoMarca" placeholder="Marca" class="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                <input type="text" id="veiculoModelo" placeholder="Modelo" class="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                <input type="number" id="veiculoAno" placeholder="Ano" class="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                <input type="text" id="veiculoPlaca" placeholder="Placa" class="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+            </div>
+            <div class="flex justify-end mt-6 gap-3">
+                <button type="button" onclick="closeModal('veiculoModal')" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancelar</button>
+                <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-md">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Alugar Veículo -->
+<div id="alugarModal" class="modal-backdrop">
+    <div class="modal-content bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-6">
+        <h3 class="text-xl font-semibold mb-4">Alugar Veículo</h3>
+        <p class="mb-4 text-gray-300">Selecione o cliente que irá alugar este veículo.</p>
+        <form id="alugarVeiculoForm">
+            <input type="hidden" id="alugarVeiculoId">
+            <select id="alugarClienteSelect" class="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                <!-- Opções de clientes serão inseridas aqui -->
+            </select>
+            <div class="flex justify-end mt-6 gap-3">
+                <button type="button" onclick="closeModal('alugarModal')" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancelar</button>
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md">Confirmar Locação</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Toast/Notificação -->
+<div id="toast" class="toast"></div>
+
+<script>
+    const API_BASE_URL = 'http://localhost:8080';
+
+    // Funções de Utilitário (Modal, Toast)
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('flex');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('flex');
+    }
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast show ${type}`;
+        setTimeout(() => {
+            toast.className = 'toast';
+        }, 3000);
+    }
+
+    // --- LÓGICA DA API (CORRIGIDA) ---
+    async function fetchData(endpoint, options = {}) {
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+
+            // Lê a resposta como texto primeiro para inspecionar.
+            const responseText = await response.text();
+
+            if (!response.ok) {
+                // Usa o texto que já lemos para uma mensagem de erro mais detalhada.
+                throw new Error(`Erro na API: ${response.status} ${response.statusText} - ${responseText || 'Sem detalhes'}`);
+            }
+
+            // Se o texto da resposta estiver vazio, não há JSON para analisar.
+            // Isso acontece com respostas 200, 201 ou 204 com corpo vazio.
+            // Retornamos null para que o código continue a execução normalmente.
+            if (!responseText) {
+                return null;
+            }
+
+            // Se houver texto, tentamos analisá-lo como JSON.
+            return JSON.parse(responseText);
+
+        } catch (error) {
+            console.error('Falha na requisição:', error);
+            // Evita mostrar erros técnicos de "parse" para o usuário.
+            if (!(error instanceof SyntaxError)) {
+                 showToast(error.message, 'error');
+            }
+            throw error; // Lança o erro para ser pego pelo catch vazio nos manipuladores de evento.
+        }
+    }
+
+    // --- LÓGICA DE RENDERIZAÇÃO ---
+
+    function renderClientes(clientes) {
+        const list = document.getElementById('clientes-list');
+        if (!clientes || clientes.length === 0) {
+            list.innerHTML = '<p class="text-gray-500">Nenhum cliente encontrado. Adicione um novo cliente para começar.</p>';
+            return;
+        }
+
+        list.innerHTML = clientes.map(cliente => `
+            <div class="bg-gray-800 p-4 rounded-lg shadow-md border border-gray-700">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h4 class="font-bold text-lg text-indigo-400">${cliente.name}</h4>
+                        <p class="text-sm text-gray-400"><i class="fas fa-id-card mr-2"></i>CPF: ${cliente.cpf}</p>
+                        <p class="text-sm text-gray-400"><i class="fas fa-phone mr-2"></i>Telefone: ${cliente.telefone}</p>
+                    </div>
+                    <button onclick="deleteCliente('${cliente.uuid}')" class="text-red-500 hover:text-red-400 text-sm p-2 rounded-full transition-colors"><i class="fas fa-trash-alt fa-lg"></i></button>
+                </div>
+                <div class="mt-4">
+                    <h5 class="font-semibold text-sm mb-2 text-gray-300">Veículos Alugados:</h5>
+                    <div id="veiculos-alugados-${cliente.uuid}" class="space-y-2">
+                        <!-- Veículos alugados por este cliente -->
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        clientes.forEach(cliente => fetchVeiculosDoCliente(cliente.uuid));
+    }
+
+    function renderVeiculosDoCliente(clienteId, veiculos) {
+        const list = document.getElementById(`veiculos-alugados-${clienteId}`);
+         if (!veiculos || veiculos.length === 0) {
+            list.innerHTML = '<p class="text-xs text-gray-500">Nenhum veículo alugado por este cliente.</p>';
+            return;
+        }
+        list.innerHTML = veiculos.map(v => `
+            <div class="bg-gray-700 p-2 rounded flex justify-between items-center">
+                <span class="text-sm">${v.marca} ${v.modelo} (Placa: ${v.placa})</span>
+                <button onclick="devolverVeiculo('${clienteId}', ${v.id})" class="bg-yellow-600 hover:bg-yellow-700 text-white text-xs font-bold py-1 px-2 rounded">Devolver</button>
+            </div>
+        `).join('');
+    }
+
+    function renderVeiculosDisponiveis(veiculos) {
+        const list = document.getElementById('veiculos-list');
+        if (!veiculos || veiculos.length === 0) {
+            list.innerHTML = '<p class="text-gray-500">Nenhum veículo disponível no momento.</p>';
+            return;
+        }
+        list.innerHTML = veiculos.map(veiculo => `
+            <div class="bg-gray-800 p-4 rounded-lg shadow-md border border-gray-700">
+                <h4 class="font-bold text-lg text-teal-400">${veiculo.marca} ${veiculo.modelo}</h4>
+                <p class="text-sm text-gray-400">Ano: ${veiculo.ano}</p>
+                <p class="text-sm text-gray-400">Placa: ${veiculo.placa}</p>
+                <div class="flex justify-end items-center gap-2 mt-3">
+                    <button onclick="deleteVeiculo(${veiculo.id})" class="text-red-500 hover:text-red-400 p-2 text-sm rounded-full transition-colors"><i class="fas fa-trash-alt"></i></button>
+                    <button onclick="showAlugarModal(${veiculo.id})" class="bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold py-1 px-3 rounded">Alugar</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function populateClienteSelect(clientes) {
+        const select = document.getElementById('alugarClienteSelect');
+        if (!clientes || clientes.length === 0) {
+            select.innerHTML = '<option value="">Crie um cliente primeiro</option>';
+            return;
+        }
+        select.innerHTML = '<option value="" disabled selected>Selecione um cliente...</option>';
+        select.innerHTML += clientes.map(c => `<option value="${c.uuid}">${c.name}</option>`).join('');
+    }
+
+    // --- FUNÇÕES DE FETCH E ATUALIZAÇÃO ---
+    async function fetchClientes() {
+        try {
+            const clientes = await fetchData('/clientes');
+            renderClientes(clientes);
+            populateClienteSelect(clientes);
+        } catch (e) {
+            console.warn("Não foi possível carregar clientes. Verifique se o endpoint GET /clientes existe na API.");
+            renderClientes([]);
+            populateClienteSelect([]);
+        }
+    }
+
+    async function loadAllData() {
+        fetchClientes();
+        const veiculosDisponiveis = await fetchData('/veiculos/disponiveis');
+        renderVeiculosDisponiveis(veiculosDisponiveis);
+    }
+
+    async function fetchVeiculosDoCliente(clienteId) {
+        try {
+            const veiculos = await fetchData(`/clientes/${clienteId}/veiculos`);
+            renderVeiculosDoCliente(clienteId, veiculos);
+        } catch(e) {
+            renderVeiculosDoCliente(clienteId, []);
+        }
+    }
+
+    // --- MANIPULADORES DE EVENTOS ---
+
+    document.getElementById('addClienteForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const body = {
+            name: document.getElementById('clienteName').value,
+            telefone: document.getElementById('clienteTelefone').value,
+            cpf: document.getElementById('clienteCpf').value,
+        };
+        try {
+            await fetchData('/clientes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            showToast('Cliente adicionado com sucesso!');
+            closeModal('clienteModal');
+e.target.reset();
+            loadAllData();
+        } catch (error) {}
+    });
+
+    document.getElementById('addVeiculoForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const body = {
+            marca: document.getElementById('veiculoMarca').value,
+            modelo: document.getElementById('veiculoModelo').value,
+            ano: parseInt(document.getElementById('veiculoAno').value),
+            placa: document.getElementById('veiculoPlaca').value,
+        };
+        try {
+            await fetchData('/veiculos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            showToast('Veículo adicionado com sucesso!');
+            closeModal('veiculoModal');
+            e.target.reset();
+            loadAllData();
+        } catch (error) {}
+    });
+
+    document.getElementById('alugarVeiculoForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const veiculoId = document.getElementById('alugarVeiculoId').value;
+        const clienteId = document.getElementById('alugarClienteSelect').value;
+        if (!clienteId) {
+            showToast("Por favor, selecione um cliente.", "error");
+            return;
+        }
+        try {
+            await fetchData(`/clientes/${clienteId}/veiculos/${veiculoId}`, { method: 'PUT' });
+            showToast('Veículo alugado com sucesso!');
+            closeModal('alugarModal');
+            loadAllData();
+        } catch (error) {}
+    });
+
+    async function deleteCliente(clienteId) {
+        if (!confirm('Tem certeza que deseja deletar este cliente? Esta ação não pode ser desfeita.')) return;
+        try {
+            await fetchData(`/clientes/${clienteId}`, { method: 'DELETE' });
+            showToast('Cliente deletado com sucesso!');
+            loadAllData();
+        } catch (error) {}
+    }
+
+    async function deleteVeiculo(veiculoId) {
+        if (!confirm('Tem certeza que deseja deletar este veículo?')) return;
+        try {
+            await fetchData(`/veiculos/${veiculoId}`, { method: 'DELETE' });
+            showToast('Veículo deletado com sucesso!');
+            loadAllData();
+        } catch (error) {}
+    }
+
+    async function devolverVeiculo(clienteId, veiculoId) {
+        try {
+            await fetchData(`/clientes/${clienteId}/veiculos/${veiculoId}`, { method: 'DELETE' });
+            showToast('Veículo devolvido com sucesso!');
+            loadAllData();
+        } catch (error) {}
+    }
+
+    function showAlugarModal(veiculoId) {
+        document.getElementById('alugarVeiculoId').value = veiculoId;
+        openModal('alugarModal');
+    }
+
+    // Carregamento inicial
+    document.addEventListener('DOMContentLoaded', loadAllData);
+</script>
+</body>
+</html>
+
