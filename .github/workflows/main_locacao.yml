@@ -27,11 +27,16 @@ jobs:
       - name: Build with Maven
         run: mvn clean install
 
+      # --- CORREÇÃO 1: Renomear o .jar para um nome padrão ---
+      - name: Rename JAR file
+        run: mv target/*.jar target/app.jar
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: '${{ github.workspace }}/target/*.jar'
+          # --- CORREÇÃO 2: Apontar para o novo nome do arquivo ---
+          path: '${{ github.workspace }}/target/app.jar'
 
   deploy:
     runs-on: ubuntu-latest
@@ -59,7 +64,8 @@ jobs:
         with:
           app-name: 'locacao'
           slot-name: 'Production'
-          package: '*.jar'
-          # --- CORREÇÃO ADICIONADA AQUI ---
-          # Esta linha instrui o App Service a executar o .jar após o deploy.
-          startup-command: 'java -jar *.jar'
+          # --- CORREÇÃO 3: Usar o nome de pacote fixo ---
+          package: 'app.jar'
+          # --- CORREÇÃO 4: Usar o comando de inicialização com o nome fixo ---
+          startup-command: 'java -jar app.jar'
+
