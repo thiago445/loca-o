@@ -155,7 +155,8 @@
 <div id="toast" class="toast"></div>
 
 <script>
-    const API_BASE_URL = 'http://localhost:8080';
+    // CORREÇÃO: Usar um caminho relativo para a API funcionar em qualquer ambiente (local e Azure)
+    const API_BASE_URL = '';
 
     // Funções de Utilitário (Modal, Toast)
     function openModal(modalId) {
@@ -179,7 +180,7 @@
     async function fetchData(endpoint, options = {}) {
         try {
             const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
-
+            
             // Lê a resposta como texto primeiro para inspecionar.
             const responseText = await response.text();
 
@@ -236,7 +237,12 @@
             </div>
         `).join('');
 
-        clientes.forEach(cliente => fetchVeiculosDoCliente(cliente.uuid));
+        clientes.forEach(cliente => {
+            // A API de clientes já retorna os veículos, então podemos renderizá-los diretamente
+            if (cliente.veiculos) {
+                renderVeiculosDoCliente(cliente.uuid, cliente.veiculos);
+            }
+        });
     }
 
     function renderVeiculosDoCliente(clienteId, veiculos) {
@@ -296,19 +302,23 @@
     }
 
     async function loadAllData() {
-        fetchClientes();
-        const veiculosDisponiveis = await fetchData('/veiculos/disponiveis');
-        renderVeiculosDisponiveis(veiculosDisponiveis);
-    }
-
-    async function fetchVeiculosDoCliente(clienteId) {
         try {
-            const veiculos = await fetchData(`/clientes/${clienteId}/veiculos`);
-            renderVeiculosDoCliente(clienteId, veiculos);
+            // Otimização: Carrega clientes e veículos em paralelo
+            const [clientes, veiculosDisponiveis] = await Promise.all([
+                fetchData('/clientes'),
+                fetchData('/veiculos/disponiveis')
+            ]);
+            
+            renderClientes(clientes);
+            populateClienteSelect(clientes);
+            renderVeiculosDisponiveis(veiculosDisponiveis);
         } catch(e) {
-            renderVeiculosDoCliente(clienteId, []);
+            showToast("Falha ao carregar dados da aplicação.", "error");
         }
     }
+
+    // REMOVIDO: Esta função não é mais necessária, pois os veículos já vêm com os clientes.
+    // async function fetchVeiculosDoCliente(clienteId) { ... }
 
     // --- MANIPULADORES DE EVENTOS ---
 
@@ -327,7 +337,7 @@
             });
             showToast('Cliente adicionado com sucesso!');
             closeModal('clienteModal');
-e.target.reset();
+            e.target.reset();
             loadAllData();
         } catch (error) {}
     });
