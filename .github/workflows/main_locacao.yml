@@ -66,6 +66,6 @@ jobs:
           slot-name: 'Production'
           # --- CORREÇÃO 3: Usar o nome de pacote fixo ---
           package: 'app.jar'
-          # --- CORREÇÃO 4: Usar o comando de inicialização com o nome fixo ---
-          startup-command: 'java -jar app.jar'
+          # --- CORREÇÃO 4: Usar o caminho absoluto no comando de inicialização ---
+          startup-command: 'java -jar /home/site/wwwroot/app.jar'
 
